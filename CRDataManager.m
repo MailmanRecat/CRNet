@@ -18,17 +18,51 @@ static NSString *const LAST_WIFI_SENT_RECORD = @"LAST_WIFI_SENT_RECOED";
 static NSString *const LAST_WWAN_RECEIVED_RECORD = @"LAST_WWAN_RECEVIED_RECORD";
 static NSString *const LAST_WWAN_SENT_RECORD = @"LAST_WWAN_SENT_RECORD";
 
+static NSString *const LAST_PROGRESS_WIFI_CACHE = @"LAST_PROGRESS_WIFI_CACHE";
+static NSString *const LAST_PROGRESS_WWAN_CACHE = @"LAST_PROGRESS_WWAN_CACHE";
+
 @implementation CRDataManager
 
-//+ (void)setDataOffset:(NSInteger)WiFiR :(NSInteger)WiFiS :(NSInteger)WWANR :(NSInteger)WWANS{
-//    NSInteger old = [[NSUserDefaults standardUserDefaults] integerForKey:LAST_WIFI_RECEIVED_DATA];
-//    if( !old ) old = 0;
-//    [[NSUserDefaults standardUserDefaults] setInteger:offset + old forKey:LAST_WIFI_RECEIVED_DATA];
-//    [[NSUserDefaults standardUserDefaults] synchronize];
-//    
-//    return offset;
-//
-//}
++ (void)setProgressTarget:(NSString *)type value:(NSUInteger)value{
+    NSArray *lastRecord = [self lastDataRecord];
+    
+    NSInteger wir = [lastRecord[0] integerValue];
+    NSInteger wwr = [lastRecord[2] integerValue];
+    
+    if( type == PROGRESS_TARGET_WIFI ){
+        [[NSUserDefaults standardUserDefaults] setInteger:((value == 0 ? 1024 : value) * 1024) forKey:PROGRESS_TARGET_WIFI];
+        [[NSUserDefaults standardUserDefaults] setInteger:wir forKey:LAST_PROGRESS_WIFI_CACHE];
+    }else if( type == PROGRESS_TARGET_WWAN ){
+        [[NSUserDefaults standardUserDefaults] setInteger:((value == 0 ? 1024 : value) * 1024) forKey:PROGRESS_TARGET_WWAN];
+        [[NSUserDefaults standardUserDefaults] setInteger:wwr forKey:LAST_PROGRESS_WWAN_CACHE];
+    }
+    
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
++ (NSUInteger)getProgressTarget:(NSString *)type{
+    NSUInteger t = 0;
+    if( type == PROGRESS_TARGET_WIFI )
+        t = [[NSUserDefaults standardUserDefaults] integerForKey:PROGRESS_TARGET_WIFI];
+    else if( type == PROGRESS_TARGET_WWAN )
+        t = [[NSUserDefaults standardUserDefaults] integerForKey:PROGRESS_TARGET_WWAN];
+    
+    return t == 0 ? 1024 : t;
+}
+
++ (float)getProgress:(NSString *)type{
+    NSArray *lastRecord = [self lastDataRecord];
+    
+    NSInteger wir = [lastRecord[0] integerValue];
+    NSInteger wwr = [lastRecord[2] integerValue];
+    
+    NSUserDefaults *dfs = [NSUserDefaults standardUserDefaults];
+    
+    if( type == PROGRESS_TARGET_WWAN )
+        return (wwr - [dfs integerForKey:LAST_PROGRESS_WWAN_CACHE] + 0.0) / [dfs integerForKey:PROGRESS_TARGET_WWAN];
+    else
+        return (wir - [dfs integerForKey:LAST_PROGRESS_WIFI_CACHE] + 0.0) / [dfs integerForKey:PROGRESS_TARGET_WIFI];
+}
 
 + (void)setLastDataRecord:(NSInteger)WiFiR :(NSInteger)WiFiS :(NSInteger)WWANR :(NSInteger)WWANS{
     [[NSUserDefaults standardUserDefaults] setInteger:WiFiR forKey:LAST_WIFI_RECEIVED_RECORD];

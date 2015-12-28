@@ -9,6 +9,7 @@
 #define REFRESH_INTERVAL 1
 
 #import "CRMainViewController.h"
+#import "CRDataManager.h"
 #import "CRFlowAsset.h"
 #import "CRKBNumberPad.h"
 
@@ -88,12 +89,6 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
     [self letEffect];
     [self letButton];
     
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    [center addObserver:self
-               selector:@selector(willKeyBoardChangeFrame:)
-                   name:UIKeyboardWillChangeFrameNotification
-                 object:nil];
-    
     [self letStart];
 }
 
@@ -118,15 +113,18 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
     dispatch_sync(dispatch_get_main_queue(), ^{
         [self.speed setText:asset.download];
         [self.networkType setText:asset.type];
-        [self.progress setProgress:asset.progress animated:YES];
         [self.progressLabel setText:asset.progressString];
         
-        if( asset.progress > 0.6 && ![self.status isEqualToString:CR_NET_STATUS_BABOON] )
-            [self updateStatus:CR_NET_STATUS_BABOON];
-        if( asset.progress > 0.9 && ![self.status isEqualToString:CR_NET_STATUS_MONKEY] )
-            [self updateStatus:CR_NET_STATUS_MONKEY];
-        else if( asset.progress <= 0.6 && ![self.status isEqualToString:CR_NET_STATUS_BEAR] )
-            [self updateStatus:CR_NET_STATUS_BEAR];
+        if( asset.progress > 0 ){
+            [self.progress setProgress:asset.progress animated:YES];
+
+            if( asset.progress > 0.6 && ![self.status isEqualToString:CR_NET_STATUS_BABOON] )
+                [self updateStatus:CR_NET_STATUS_BABOON];
+            if( asset.progress > 0.9 && ![self.status isEqualToString:CR_NET_STATUS_MONKEY] )
+                [self updateStatus:CR_NET_STATUS_MONKEY];
+            else if( asset.progress <= 0.6 && ![self.status isEqualToString:CR_NET_STATUS_BEAR] )
+                [self updateStatus:CR_NET_STATUS_BEAR];
+        }
     });
 }
 
@@ -168,7 +166,7 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
         self.progressLayoutGuide = [progress.centerYAnchor constraintEqualToAnchor:self.view.bottomAnchor];
         self.progressLayoutGuide.constant = - self.view.frame.size.height * 0.382;
         self.progressLayoutGuide.active = YES;
-        progress.progress = 0.3;
+        progress.clipsToBounds = YES;
         progress.tintColor = [UIColor colorWithRed:29  / 255.0 green:109 / 255.0 blue:217 / 255.0 alpha:1];
         progress.trackTintColor = [UIColor whiteColor];
         progress;
@@ -229,6 +227,15 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
         [self letPop];
     }else if( tag == 0 ){
         [self letPush];
+        self.targetField.text = @" MB";
+    }else if( tag == 1 ){
+        NSUInteger target = [[self.targetField.text substringToIndex:self.targetField.text.length - 3] integerValue];
+        [CRDataManager setProgressTarget:PROGRESS_TARGET_WIFI value:target];
+        [self letPop];
+    }else if( tag == 2 ){
+        NSUInteger target = [[self.targetField.text substringToIndex:self.targetField.text.length - 3] integerValue];
+        [CRDataManager setProgressTarget:PROGRESS_TARGET_WWAN value:target];
+        [self letPop];
     }
 }
 
@@ -309,36 +316,6 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
     self.keyboardContent.hidden = YES;
 }
 
-- (void)textFieldDidBeginEditing:(UITextField *)textField{
-    
-}
-
-- (void)textFieldOnEditing:(UITextField *)textField{
-    UITextRange *range = textField.selectedTextRange;
-    UITextPosition *start = [textField positionFromPosition:range.start inDirection:UITextLayoutDirectionLeft offset:textField.text.length - 4];
-    if( start )
-        [textField setSelectedTextRange:[textField textRangeFromPosition:range.start toPosition:start]];
-}
-
-- (void)willKeyBoardChangeFrame:(NSNotification *)keyboardInfo{
-    NSDictionary *info = [keyboardInfo userInfo];
-    CGFloat constant = self.view.frame.size.height - [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].origin.y;
-    CGFloat duration = [info[UIKeyboardAnimationDurationUserInfoKey] floatValue];
-    UIViewAnimationOptions option = [info[UIKeyboardAnimationCurveUserInfoKey] integerValue];
-    
-    self.addTargetLayoutGuide.constant = -constant > 0 ? 0 : -constant;
-    
-    [UIView animateWithDuration:duration
-                          delay:0.0f
-                        options:option
-                     animations:^{
-                         [self.addTarget layoutIfNeeded];
-                         [self.targetCock layoutIfNeeded];
-                         [self.targetDick layoutIfNeeded];
-                     }
-                     completion:nil];
-}
-
 - (void)letPop{
     [self.view endEditing:YES];
     self.effectLayoutGuide.constant = -(STATUS_BAR_HEIGHT + 56);
@@ -401,17 +378,6 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
 - (void)viewDidLayoutSubviews{
     self.good.frame = self.view.bounds;
 }
-
-//- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-//    
-//        if( [self.status isEqualToString:CR_NET_STATUS_BEAR] )
-//            [self updateStatus:CR_NET_STATUS_BABOON];
-//        else if( [self.status isEqualToString:CR_NET_STATUS_BABOON] )
-//            [self updateStatus:CR_NET_STATUS_MONKEY];
-//        else if( [self.status isEqualToString:CR_NET_STATUS_MONKEY] )
-//            [self updateStatus:CR_NET_STATUS_BEAR];
-//    
-//}
 
 - (UIStatusBarStyle)preferredStatusBarStyle{
     return UIStatusBarStyleLightContent;

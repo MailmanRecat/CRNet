@@ -8,6 +8,7 @@
 
 #import "CRFlowAsset.h"
 #import "CRNetManager.h"
+#import "CRDataManager.h"
 
 @interface CRFlowAsset()
 
@@ -43,16 +44,24 @@
 - (float)progress{
     NSString *type = [CRNetManager networktype];
     if( type == CR_NET_TYPE_WWAN ){
+        CGFloat pro = [CRDataManager getProgress:PROGRESS_TARGET_WWAN];
+        NSUInteger cache = [CRDataManager getProgressTarget:PROGRESS_TARGET_WWAN];
+        if( cache / 1024 < 1024 )
+            self.progressString = [NSString stringWithFormat:@"%.1f MB of %ld MB", cache / 1024 * pro, cache / 1024];
+        else
+            self.progressString = [NSString stringWithFormat:@"%.2f GB of %.2f GB", cache / 1024 / 1024 * pro, cache / 1024 / 1024.0];
         
+        return pro;
     }else{
+        CGFloat pro = [CRDataManager getProgress:PROGRESS_TARGET_WIFI];
+        NSUInteger cache = [CRDataManager getProgressTarget:PROGRESS_TARGET_WIFI];
+        if( cache / 1024 < 1024 )
+            self.progressString = [NSString stringWithFormat:@"%.1f MB of %ld MB", cache / 1024 * pro, cache / 1024];
+        else
+            self.progressString = [NSString stringWithFormat:@"%.2f GB of %.2f GB", cache / 1024 / 1024 * pro, cache / 1024 / 1024.0];
         
+        return pro;
     }
-    
-//    NSLog(@"%ld", [self.flow[SWIFIR] integerValue] / 1024);
-    CGFloat testing = [self.flow[SWIFIR] integerValue] / (1024.0 * 1024);
-    self.progressString = [NSString stringWithFormat:@"%.3f GB of 6 GB", testing];
-    
-    return testing / 6.0;
 }
 
 + (NSString *)formatSpeed:(CGFloat)speed{
@@ -68,6 +77,12 @@
         asset = [[CRFlowAsset alloc] init];
     });
     asset.flow = [CRNetManager networkFlowFromUnit:CR_UNIT_KB];
+    
+    [CRDataManager autoCorrectOffset:[asset.flow[SWIFIR] integerValue]
+                                    :[asset.flow[SWIFIS] integerValue]
+                                    :[asset.flow[SWWANR] integerValue]
+                                    :[asset.flow[SWWANS] integerValue]];
+    
     return asset;
 }
 
