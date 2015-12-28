@@ -9,8 +9,8 @@
 #define REFRESH_INTERVAL 1
 
 #import "CRMainViewController.h"
-//#import "CRNetManager.h"
 #import "CRFlowAsset.h"
+#import "CRKBNumberPad.h"
 
 static NSString *const CR_NET_STATUS_BEAR = @"CR_NET_STATUS_BEAR";
 static NSString *const CR_NET_STATUS_BABOON = @"CR_NET_STATUS_BABOON";
@@ -25,6 +25,8 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
 
 @property( nonatomic, strong ) UIButton *cancel;
 @property( nonatomic, strong ) UITextField *targetField;
+@property( nonatomic, strong ) UIVisualEffectView *keyboardContent;
+@property( nonatomic, strong ) CRKBNumberPad *keyboardPad;
 @property( nonatomic, strong ) UIVisualEffectView *effect;
 @property( nonatomic, strong ) NSLayoutConstraint *effectLayoutGuide;
 
@@ -106,14 +108,13 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
     dispatch_source_set_timer(timerToken, dispatch_time(DISPATCH_TIME_NOW, 0), interval, 0);
     
     dispatch_source_set_event_handler(timerToken, ^{
-        [self letRefresh];
+        [self letRefresh:[CRFlowAsset standarAsste]];
     });
     
     dispatch_resume(timerToken);
 }
 
-- (void)letRefresh{
-    CRFlowAsset *asset = [CRFlowAsset standarAsste];
+- (void)letRefresh:(CRFlowAsset *)asset{
     dispatch_sync(dispatch_get_main_queue(), ^{
         [self.speed setText:asset.download];
         [self.networkType setText:asset.type];
@@ -245,16 +246,6 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
         blurview;
     });
     
-    self.cancel = ({
-        UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 42, 42)];
-        button.tag = 1005;
-        button.titleLabel.font = [UIFont MaterialDesignIconsWithSize:24];
-        [button setTitle:[UIFont mdiArrowLeft] forState:UIControlStateNormal];
-        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [button addTarget:self action:@selector(buttonAction:) forControlEvents:UIControlEventTouchUpInside];
-        button;
-    });
-    
     self.targetField = ({
         UITextField *field = [[UITextField alloc] init];
         field.translatesAutoresizingMaskIntoConstraints = NO;
@@ -263,24 +254,59 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
         [field.rightAnchor constraintEqualToAnchor:self.effect.contentView.rightAnchor constant:-16].active = YES;
         [field.topAnchor constraintEqualToAnchor:self.effect.contentView.topAnchor constant:STATUS_BAR_HEIGHT + 16].active = YES;
         [field.heightAnchor constraintEqualToConstant:42].active = YES;
-        [field addTarget:self action:@selector(textFieldOnEditing:) forControlEvents:UIControlEventAllEditingEvents];
         field.leftViewMode = UITextFieldViewModeAlways;
-        field.delegate = self;
-        field.leftView = self.cancel;
+        field.enabled = NO;
+        field.leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 42, 42)];
         field.layer.borderWidth = 1.0f;
         field.layer.borderColor = [UIColor whiteColor].CGColor;
         field.layer.cornerRadius = 6.0f;
-        field.clearButtonMode = UITextFieldViewModeWhileEditing;
         field.keyboardType = UIKeyboardTypeNumberPad;
         field.tintColor = [UIColor whiteColor];
         field.textColor = [UIColor whiteColor];
-//        field.placeholder = @"Set a target number";
         field.text = @" MB";
         
         field;
     });
     
+    self.cancel = ({
+        UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(16, STATUS_BAR_HEIGHT + 16, 42, 42)];
+        [self.effect addSubview:button];
+        button.tag = 1005;
+        button.titleLabel.font = [UIFont MaterialDesignIconsWithSize:24];
+        [button setTitle:[UIFont mdiArrowLeft] forState:UIControlStateNormal];
+        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(buttonAction:) forControlEvents:UIControlEventTouchUpInside];
+        button;
+    });
+    
+    self.keyboardContent = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleExtraLight]];
+    self.keyboardContent.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.effect.contentView addSubview:self.keyboardContent];
+    [self.keyboardContent.bottomAnchor constraintEqualToAnchor:self.effect.contentView.bottomAnchor].active = YES;
+    [self.keyboardContent.widthAnchor constraintEqualToAnchor:self.effect.contentView.widthAnchor].active = YES;
+    [self.keyboardContent.centerXAnchor constraintEqualToAnchor:self.effect.contentView.centerXAnchor].active = YES;
+    [self.keyboardContent.heightAnchor constraintEqualToConstant:218].active = YES;
+    
+    self.keyboardPad = [[CRKBNumberPad alloc] init];
+    self.keyboardPad.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.keyboardContent.contentView addSubview:self.keyboardPad];
+    [self.keyboardPad.topAnchor constraintEqualToAnchor:self.keyboardContent.contentView.topAnchor].active = YES;
+    [self.keyboardPad.leftAnchor constraintEqualToAnchor:self.keyboardContent.contentView.leftAnchor].active = YES;
+    [self.keyboardPad.rightAnchor constraintEqualToAnchor:self.keyboardContent.contentView.rightAnchor].active = YES;
+    [self.keyboardPad.bottomAnchor constraintEqualToAnchor:self.keyboardContent.contentView.bottomAnchor].active = YES;
+    
+    __weak __typeof(&*self)weakSelf = self;
+    self.keyboardPad.padHandler = ^(NSInteger number){
+        if( number == -1 && self.targetField.text.length > 3 ){
+            weakSelf.targetField.text = [NSString stringWithFormat:@"%@ MB", [weakSelf.targetField.text substringToIndex:weakSelf.targetField.text.length - 4]];
+        }else if( number > -1 ){
+            weakSelf.targetField.text = [NSString stringWithFormat:@"%@%ld MB", [weakSelf.targetField.text substringToIndex:weakSelf.targetField.text.length - 3], number];
+        }
+    };
+    
+    self.cancel.hidden = YES;
     self.targetField.hidden = YES;
+    self.keyboardContent.hidden = YES;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField{
@@ -319,13 +345,17 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
     self.targetCock.hidden = YES;
     self.targetDick.hidden = YES;
     self.addTarget.hidden = NO;
+    self.addTargetLayoutGuide.constant = 0;
     [UIView animateWithDuration:0.25f
                           delay:0.0f
                         options:(7 << 16)
                      animations:^{
+                         self.cancel.alpha =
                          self.targetField.alpha = 0;
                          [self.view layoutIfNeeded];
                      }completion:^(BOOL f){
+                         self.cancel.hidden =
+                         self.keyboardContent.hidden =
                          self.targetField.hidden = YES;
                      }];
 }
@@ -334,13 +364,18 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
     self.effectLayoutGuide.constant = -self.view.frame.size.height;
     self.targetCock.hidden = NO;
     self.targetDick.hidden = NO;
+    self.cancel.alpha = 0;
     self.targetField.alpha = 0;
+    self.cancel.hidden = NO;
+    self.keyboardContent.hidden = NO;
     self.targetField.hidden = NO;
     self.addTarget.hidden = YES;
+    self.addTargetLayoutGuide.constant = -218;
     [UIView animateWithDuration:0.25f
                           delay:0.0f
                         options:(7 << 16)
                      animations:^{
+                         self.cancel.alpha =
                          self.targetField.alpha = 1;
                          [self.view layoutIfNeeded];
                      }completion:^(BOOL f){
@@ -363,28 +398,20 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
     self.status = status;
 }
 
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-    
-//    if( [self.status isEqualToString:CR_NET_STATUS_BEAR] )
-//        [self updateStatus:CR_NET_STATUS_BABOON];
-//    else if( [self.status isEqualToString:CR_NET_STATUS_BABOON] )
-//        [self updateStatus:CR_NET_STATUS_MONKEY];
-//    else if( [self.status isEqualToString:CR_NET_STATUS_MONKEY] )
-//        [self updateStatus:CR_NET_STATUS_BEAR];
-    
-}
-
 - (void)viewDidLayoutSubviews{
     self.good.frame = self.view.bounds;
-    
-//    [self.speedLayoutGuide setConstant:- self.view.frame.size.height * 0.618];
-    
-//    if( self.effectLayoutGuide.constant != -(STATUS_BAR_HEIGHT + 56) )
-//        [self.effectLayoutGuide setConstant:- self.view.frame.size.height];
-    
-//    [self.progressLayoutGuide setConstant:- self.view.frame.size.height * 0.382];
-//    [self.view layoutIfNeeded];
 }
+
+//- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+//    
+//        if( [self.status isEqualToString:CR_NET_STATUS_BEAR] )
+//            [self updateStatus:CR_NET_STATUS_BABOON];
+//        else if( [self.status isEqualToString:CR_NET_STATUS_BABOON] )
+//            [self updateStatus:CR_NET_STATUS_MONKEY];
+//        else if( [self.status isEqualToString:CR_NET_STATUS_MONKEY] )
+//            [self updateStatus:CR_NET_STATUS_BEAR];
+//    
+//}
 
 - (UIStatusBarStyle)preferredStatusBarStyle{
     return UIStatusBarStyleLightContent;

@@ -18,10 +18,8 @@
 @implementation CRFlowAsset
 
 - (NSString *)download{
-    NSDictionary *flow = [CRNetManager networkFlowFromUnit:CR_UNIT_KB];
-    [CRFlowAsset standarAsste].flow = flow;
     
-    _download = [CRFlowAsset formatSpeed:[flow[SSPEED] floatValue]];
+    _download = [CRFlowAsset formatSpeed:[self.flow[SSPEED] floatValue]];
     
     return _download;
 }
@@ -52,7 +50,7 @@
     
 //    NSLog(@"%ld", [self.flow[SWIFIR] integerValue] / 1024);
     CGFloat testing = [self.flow[SWIFIR] integerValue] / (1024.0 * 1024);
-    self.progressString = [NSString stringWithFormat:@"%.2f GB of 6 GB", testing];
+    self.progressString = [NSString stringWithFormat:@"%.3f GB of 6 GB", testing];
     
     return testing / 6.0;
 }
@@ -69,6 +67,7 @@
     dispatch_once(&onceToken, ^{
         asset = [[CRFlowAsset alloc] init];
     });
+    asset.flow = [CRNetManager networkFlowFromUnit:CR_UNIT_KB];
     return asset;
 }
 
