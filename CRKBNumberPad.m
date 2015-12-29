@@ -57,6 +57,8 @@
         else
             button.titleLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightMedium];
         
+        [button addTarget:self action:@selector(padTouchCancel:) forControlEvents:UIControlEventTouchCancel];
+        [button addTarget:self action:@selector(padTouchCancel:) forControlEvents:UIControlEventTouchUpOutside];
         [button addTarget:self action:@selector(padTouchUpInside:) forControlEvents:UIControlEventTouchUpInside];
         [button addTarget:self action:@selector(padTouchDown:) forControlEvents:UIControlEventTouchDown];
         [button setTitle:title forState:UIControlStateNormal];
@@ -144,21 +146,22 @@
 - (void)padTouchUpInside:(UIButton *)sender{
     NSInteger tag = sender.tag - 1000;
     
-    if( tag >= 0 ){
-        [self.hightlightEffect removeFromSuperview];
-    }else if( tag == -1 ){
-        [sender insertSubview:self.deleteEffect atIndex:0];
-        [self.deleteEffect.topAnchor constraintEqualToAnchor:sender.topAnchor].active = YES;
-        [self.deleteEffect.leftAnchor constraintEqualToAnchor:sender.leftAnchor].active = YES;
-        [self.deleteEffect.rightAnchor constraintEqualToAnchor:sender.rightAnchor].active = YES;
-        [self.deleteEffect.bottomAnchor constraintEqualToAnchor:sender.bottomAnchor].active = YES;
-    }else if( tag == -2 ){
-        [sender insertSubview:self.optionEffect atIndex:0];
-        [self.optionEffect.topAnchor constraintEqualToAnchor:sender.topAnchor].active = YES;
-        [self.optionEffect.leftAnchor constraintEqualToAnchor:sender.leftAnchor].active = YES;
-        [self.optionEffect.rightAnchor constraintEqualToAnchor:sender.rightAnchor].active = YES;
-        [self.optionEffect.bottomAnchor constraintEqualToAnchor:sender.bottomAnchor].active = YES;
-    }
+//    if( tag >= 0 ){
+//        [self.hightlightEffect removeFromSuperview];
+//    }else if( tag == -1 ){
+//        [sender insertSubview:self.deleteEffect atIndex:0];
+//        [self.deleteEffect.topAnchor constraintEqualToAnchor:sender.topAnchor].active = YES;
+//        [self.deleteEffect.leftAnchor constraintEqualToAnchor:sender.leftAnchor].active = YES;
+//        [self.deleteEffect.rightAnchor constraintEqualToAnchor:sender.rightAnchor].active = YES;
+//        [self.deleteEffect.bottomAnchor constraintEqualToAnchor:sender.bottomAnchor].active = YES;
+//    }else if( tag == -2 ){
+//        [sender insertSubview:self.optionEffect atIndex:0];
+//        [self.optionEffect.topAnchor constraintEqualToAnchor:sender.topAnchor].active = YES;
+//        [self.optionEffect.leftAnchor constraintEqualToAnchor:sender.leftAnchor].active = YES;
+//        [self.optionEffect.rightAnchor constraintEqualToAnchor:sender.rightAnchor].active = YES;
+//        [self.optionEffect.bottomAnchor constraintEqualToAnchor:sender.bottomAnchor].active = YES;
+//    }
+    [self letEffectDisappear:sender];
     
     if( self.padHandler )
         self.padHandler( tag );
@@ -176,6 +179,30 @@
         [self.hightlightEffect.leftAnchor constraintEqualToAnchor:sender.leftAnchor].active = YES;
         [self.hightlightEffect.rightAnchor constraintEqualToAnchor:sender.rightAnchor].active = YES;
         [self.hightlightEffect.bottomAnchor constraintEqualToAnchor:sender.bottomAnchor].active = YES;
+    }
+}
+
+- (void)padTouchCancel:(UIButton *)btn{
+    [self letEffectDisappear:btn];
+}
+
+- (void)letEffectDisappear:(UIButton *)sender{
+    NSInteger tag = sender.tag - 1000;
+    
+    if( tag >= 0 ){
+        [self.hightlightEffect removeFromSuperview];
+    }else if( tag == -1 ){
+        [sender insertSubview:self.deleteEffect atIndex:0];
+        [self.deleteEffect.topAnchor constraintEqualToAnchor:sender.topAnchor].active = YES;
+        [self.deleteEffect.leftAnchor constraintEqualToAnchor:sender.leftAnchor].active = YES;
+        [self.deleteEffect.rightAnchor constraintEqualToAnchor:sender.rightAnchor].active = YES;
+        [self.deleteEffect.bottomAnchor constraintEqualToAnchor:sender.bottomAnchor].active = YES;
+    }else if( tag == -2 ){
+        [sender insertSubview:self.optionEffect atIndex:0];
+        [self.optionEffect.topAnchor constraintEqualToAnchor:sender.topAnchor].active = YES;
+        [self.optionEffect.leftAnchor constraintEqualToAnchor:sender.leftAnchor].active = YES;
+        [self.optionEffect.rightAnchor constraintEqualToAnchor:sender.rightAnchor].active = YES;
+        [self.optionEffect.bottomAnchor constraintEqualToAnchor:sender.bottomAnchor].active = YES;
     }
 }
 

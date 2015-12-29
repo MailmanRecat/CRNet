@@ -48,8 +48,12 @@
         NSUInteger cache = [CRDataManager getProgressTarget:PROGRESS_TARGET_WWAN];
         if( cache / 1024 < 1024 )
             self.progressString = [NSString stringWithFormat:@"%.1f MB of %ld MB", cache / 1024 * pro, cache / 1024];
-        else
-            self.progressString = [NSString stringWithFormat:@"%.2f GB of %.2f GB", cache / 1024 / 1024 * pro, cache / 1024 / 1024.0];
+        else{
+            if( cache / 1024 * pro < 1024 )
+                self.progressString = [NSString stringWithFormat:@"%ld MB of %.2f GB", (NSUInteger)(cache / 1024 * pro), cache / 1024 / 1024.0];
+            else
+                self.progressString = [NSString stringWithFormat:@"%.2f GB of %.2f GB", cache / 1024 / 1024 * pro, cache / 1024 / 1024.0];
+        }
         
         return pro;
     }else{
@@ -57,8 +61,12 @@
         NSUInteger cache = [CRDataManager getProgressTarget:PROGRESS_TARGET_WIFI];
         if( cache / 1024 < 1024 )
             self.progressString = [NSString stringWithFormat:@"%.1f MB of %ld MB", cache / 1024 * pro, cache / 1024];
-        else
-            self.progressString = [NSString stringWithFormat:@"%.2f GB of %.2f GB", cache / 1024 / 1024 * pro, cache / 1024 / 1024.0];
+        else{
+            if( cache / 1024 * pro < 1024 )
+                self.progressString = [NSString stringWithFormat:@"%ld MB of %.2f GB", (NSUInteger)(cache / 1024 * pro), cache / 1024 / 1024.0];
+            else
+                self.progressString = [NSString stringWithFormat:@"%.2f GB of %.2f GB", cache / 1024 / 1024 * pro, cache / 1024 / 1024.0];
+        }
         
         return pro;
     }

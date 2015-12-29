@@ -55,10 +55,8 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
 
 @implementation CRMainViewController
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
+- (void)subInit{
     self.view.backgroundColor = [UIColor clearColor];
-    
     self.bearColors = @[
                         (__bridge id)[UIColor colorWithRed:50  / 255.0 green:199 / 255.0 blue:244 / 255.0 alpha:1].CGColor,
                         (__bridge id)[UIColor colorWithRed:29  / 255.0 green:109 / 255.0 blue:217 / 255.0 alpha:1].CGColor
@@ -80,10 +78,17 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
     
     self.status = CR_NET_STATUS_BEAR;
     
+    [self updateStatus:CR_NET_STATUS_BABOON];
+    
     self.good = good;
     
     [self.view.layer addSublayer:good];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
     
+    [self subInit];
     [self letSpeed];
     [self letProgress];
     [self letEffect];
@@ -120,7 +125,7 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
 
             if( asset.progress > 0.6 && ![self.status isEqualToString:CR_NET_STATUS_BABOON] )
                 [self updateStatus:CR_NET_STATUS_BABOON];
-            if( asset.progress > 0.9 && ![self.status isEqualToString:CR_NET_STATUS_MONKEY] )
+            if( asset.progress > 0.81 && ![self.status isEqualToString:CR_NET_STATUS_MONKEY] )
                 [self updateStatus:CR_NET_STATUS_MONKEY];
             else if( asset.progress <= 0.6 && ![self.status isEqualToString:CR_NET_STATUS_BEAR] )
                 [self updateStatus:CR_NET_STATUS_BEAR];
@@ -182,7 +187,7 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
         [label.rightAnchor constraintEqualToAnchor:self.progress.rightAnchor].active = YES;
         label.textColor = [UIColor whiteColor];
         label.font = [UIFont systemFontOfSize:14 weight:UIFontWeightRegular];
-        label.text = @"3 GB of 8 GB";
+        label.text = @"0 MB of 1 GB";
         label;
     });
 }
@@ -230,10 +235,22 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
         self.targetField.text = @" MB";
     }else if( tag == 1 ){
         NSUInteger target = [[self.targetField.text substringToIndex:self.targetField.text.length - 3] integerValue];
+        
+        if( target < 1024 )
+            self.progressLabel.text = [NSString stringWithFormat:@"0 MB of %ld MB", target];
+        else
+            self.progressLabel.text = [NSString stringWithFormat:@"0 MB of %.2f GB", target / 1024.0];
+        
         [CRDataManager setProgressTarget:PROGRESS_TARGET_WIFI value:target];
         [self letPop];
     }else if( tag == 2 ){
         NSUInteger target = [[self.targetField.text substringToIndex:self.targetField.text.length - 3] integerValue];
+        
+        if( target < 1024 )
+            self.progressLabel.text = [NSString stringWithFormat:@"0 MB of %ld MB", target];
+        else
+            self.progressLabel.text = [NSString stringWithFormat:@"0 MB of %.2f GB", target / 1024.0];
+        
         [CRDataManager setProgressTarget:PROGRESS_TARGET_WWAN value:target];
         [self letPop];
     }
@@ -374,6 +391,21 @@ static NSString *const CR_NET_STATUS_MONKEY = @"CR_NET_STATUS_MONKEY";
     
     self.status = status;
 }
+
+//- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+//    
+//    if( [self.status isEqualToString:CR_NET_STATUS_BEAR] ){
+//        [self updateStatus:CR_NET_STATUS_BABOON];
+//        self.progressLabel.text = @"5.7 GB of 8GB";
+//    }else if( [self.status isEqualToString:CR_NET_STATUS_BABOON] ){
+//        [self updateStatus:CR_NET_STATUS_MONKEY];
+//        self.progressLabel.text = @"7.1 GB of 8GB";
+//    }else if( [self.status isEqualToString:CR_NET_STATUS_MONKEY] ){
+//        [self updateStatus:CR_NET_STATUS_BEAR];
+//        self.progressLabel.text = @"3 GB of 8GB";
+//    }
+//    
+//}
 
 - (void)viewDidLayoutSubviews{
     self.good.frame = self.view.bounds;

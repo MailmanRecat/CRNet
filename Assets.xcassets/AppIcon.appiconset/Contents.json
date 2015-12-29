@@ -3,79 +3,79 @@
     {
       "size" : "29x29",
       "idiom" : "iphone",
-      "filename" : "CRNetIcon 2-9.png",
+      "filename" : "iicon 2-8.png",
       "scale" : "2x"
     },
     {
       "size" : "29x29",
       "idiom" : "iphone",
-      "filename" : "CRNetIcon 2-12.png",
+      "filename" : "iicon 2-11.png",
       "scale" : "3x"
     },
     {
       "size" : "40x40",
       "idiom" : "iphone",
-      "filename" : "CRNetIcon 2-5.png",
+      "filename" : "iicon 2-5.png",
       "scale" : "2x"
     },
     {
       "size" : "40x40",
       "idiom" : "iphone",
-      "filename" : "CRNetIcon 2-4.png",
+      "filename" : "iicon 2-3.png",
       "scale" : "3x"
     },
     {
       "size" : "60x60",
       "idiom" : "iphone",
-      "filename" : "CRNetIcon 2-3.png",
+      "filename" : "iicon 2-2.png",
       "scale" : "2x"
     },
     {
       "size" : "60x60",
       "idiom" : "iphone",
-      "filename" : "CRNetIcon 2-1.png",
+      "filename" : "iicon 2.png",
       "scale" : "3x"
     },
     {
       "size" : "29x29",
       "idiom" : "ipad",
-      "filename" : "CRNetIcon 2-11.png",
+      "filename" : "iicon 2-10.png",
       "scale" : "1x"
     },
     {
       "size" : "29x29",
       "idiom" : "ipad",
-      "filename" : "CRNetIcon 2-8.png",
+      "filename" : "iicon 2-7.png",
       "scale" : "2x"
     },
     {
       "size" : "40x40",
       "idiom" : "ipad",
-      "filename" : "CRNetIcon 2-10.png",
+      "filename" : "iicon 2-9.png",
       "scale" : "1x"
     },
     {
       "size" : "40x40",
       "idiom" : "ipad",
-      "filename" : "CRNetIcon 2-6.png",
+      "filename" : "iicon 2-4.png",
       "scale" : "2x"
     },
     {
       "size" : "76x76",
       "idiom" : "ipad",
-      "filename" : "CRNetIcon 2-7.png",
+      "filename" : "iicon 2-6.png",
       "scale" : "1x"
     },
     {
       "size" : "76x76",
       "idiom" : "ipad",
-      "filename" : "CRNetIcon 2-2.png",
+      "filename" : "iicon 2-1.png",
       "scale" : "2x"
     },
     {
       "size" : "83.5x83.5",
       "idiom" : "ipad",
-      "filename" : "CRNetIcon 2.png",
+      "filename" : "iicon.png",
       "scale" : "2x"
     }
   ],
